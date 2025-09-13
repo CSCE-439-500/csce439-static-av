@@ -1,0 +1,11 @@
+.venv
+.git
+__pycache__/
+*.pyc
+tests/
+data/
+outputs/
+artifacts/
+csce439-av-data/
+*.parquet
+*.csv

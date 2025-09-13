@@ -27,18 +27,37 @@ def create_app() -> Flask:
 
     @app.post("/")
     def classify():
+        # Content-Type must be PE bytes
         if request.headers.get("Content-Type", "") != "application/octet-stream":
             return jsonify({"error": "expecting application/octet-stream"}), 400
+
+        # * DEBUG: header or query param
+        debug_enabled = (
+            request.headers.get("X-Debug", "").strip() == "1"
+            or request.args.get("debug", "").strip() == "1"
+        )
+
         bytez = request.data or b""
         try:
-            pred = app.config["predictor"].predict(bytez)
-            if pred not in (0, 1):
-                return jsonify({"error": "unexpected model result (not in [0,1])"}), 500
-            return jsonify({"result": int(pred)}), 200
+            if debug_enabled:
+                # Will be added in predictor.py next
+                pred, dbg = app.config["predictor"].predict_debug(bytez)
+                if pred not in (0, 1):
+                    return jsonify({"error": "unexpected model result (not in [0,1])"}), 500
+                return jsonify({"result": int(pred), "debug": dbg}), 200
+            else:
+                pred = app.config["predictor"].predict(bytez)
+                if pred not in (0, 1):
+                    return jsonify({"error": "unexpected model result (not in [0,1])"}), 500
+                return jsonify({"result": int(pred)}), 200
+
         except Exception as e:
             app.logger.exception("prediction failed: %s", e)
-            # Count parse/other errors as malicious
-            return jsonify({"result": 1}), 200
+            # * Count parse/other errors as malicious
+            resp = {"result": 1}
+            if debug_enabled:
+                resp["debug"] = {"error": "exception", "reason": str(e)}
+            return jsonify(resp), 200
 
     @app.get("/model")
     def model():
