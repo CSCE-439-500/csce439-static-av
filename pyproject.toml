@@ -30,7 +30,7 @@ dev = [
 ]
 
 [tool.setuptools]
-packages = ["avlab"]
+packages = { find = { include = ["avlab", "avlab.*"], exclude = ["configs*", "tests*", "defender*", "data*", "scripts*"] } }
 
 [tool.black]
 line-length = 100
