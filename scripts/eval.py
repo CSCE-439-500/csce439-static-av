@@ -5,7 +5,10 @@ from pathlib import Path
 
 import joblib
 import pandas as pd
+from dotenv import load_dotenv
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+
+load_dotenv()
 
 
 def main():

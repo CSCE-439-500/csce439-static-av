@@ -2,8 +2,8 @@ random_seed: 1337
 
 data:
   # Directory of PE samples
-  input_dir: "data/samples"
-  features_out: "outputs/features.parquet"
+  input_dir: "${SAMPLES_DIR}"
+  features_out: "${OUTPUTS_DIR}/features.parquet"
   label_source: "folder"   # infer label by parent directory name
 
 model:
@@ -16,4 +16,4 @@ model:
 train:
   test_size: 0.2
   stratify: true
-  out_model_path: "artifacts/baseline.joblib"
+  out_model_path: "${ARTIFACTS_DIR}/baseline.joblib"
