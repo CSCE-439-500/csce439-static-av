@@ -1,14 +1,22 @@
 from __future__ import annotations
 
 import argparse
+import os
 from pathlib import Path
 
 import joblib
 import pandas as pd
 import yaml
+from dotenv import load_dotenv
 from sklearn.model_selection import train_test_split
 
 from avlab.models.sklearn_baseline import SklearnBaselineModel
+
+load_dotenv()
+
+
+def _expand(s: str) -> Path:
+    return Path(os.path.expandvars(s)).expanduser().resolve()
 
 
 def main():
@@ -18,8 +26,10 @@ def main():
     args = parser.parse_args()
 
     cfg = yaml.safe_load(args.config.read_text())
-    feat_path = Path(cfg["data"]["features_out"])
-    out_model = Path(cfg["train"]["out_model_path"]) if not args.out else args.out
+    feat_path = _expand(cfg["data"]["features_out"])
+    out_model = (
+        _expand(cfg["train"]["out_model_path"]) if not args.out else Path(args.out).resolve()
+    )
 
     df = read_features(feat_path=feat_path)
     X = df[["n_imports"]].values

@@ -1,0 +1,4 @@
+DATA_ROOT=/FILL/IN/PATH/csce439-av-data
+SAMPLES_DIR=${DATA_ROOT}/samples
+ARTIFACTS_DIR=${DATA_ROOT}/artifacts
+OUTPUTS_DIR=${DATA_ROOT}/outputs
