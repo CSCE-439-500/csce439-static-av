@@ -1,0 +1,18 @@
+# Features to load from the ember cache
+feature_prefixes:
+  - "histogram.*"
+  - "general.*"
+  - "header.*"
+  - "strings.*"
+
+# Training/eval params
+train:
+  class_weight: "balanced"
+  model: "hgbt"
+  val_split: 0.1
+  random_state: 1337
+
+eval:
+  target_fpr: 0.01
+  val_source: "train"
+  val_max_rows: 500000
