@@ -1,26 +1,30 @@
-# Runtime image 
 FROM python:3.11-slim
 
-ENV PYTHONUNBUFFERED=1 \
-    PORT=8080
-
-# System dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates \
- && rm -rf /var/lib/apt/lists/*
+# Security & size hygiene
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1
 
 WORKDIR /app
 
-# Install runtime dependencies
-COPY defender/requirements.txt ./requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy runtime requirements first for layer caching
+COPY defender/requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
 
-# Copy code needed to serve
-COPY avlab ./avlab
-COPY defender/app ./defender/app
+# Copy server code
+COPY defender/app /app/defender/app
 
-ENV MODEL_PATH=/app/artifacts/baseline.joblib
+# Copy model artifacts into image
+COPY artifacts /app/artifacts
+
+# Env wiring (EMBER by default)
+ENV MODEL_KIND=ember \
+    ARTIFACTS_DIR=/app/artifacts \
+    MODEL_PATH=/app/artifacts/ember_model_calibrated.joblib \
+    FEATURE_SPEC=/app/artifacts/ember_feature_spec.json \
+    THRESHOLD_JSON=/app/artifacts/threshold.json \
+    PYTHONPATH=/app
+
+# Expose port and start gunicorn
 EXPOSE 8080
-
-# Gunicorn entrypoint
-CMD ["gunicorn", "-w", "2", "-b", "0.0.0.0:8080", "defender.app.server:app"]
+CMD ["gunicorn", "-b", "0.0.0.0:8080", "defender.app.server:app", "--workers", "2", "--threads", "1", "--timeout", "10"]

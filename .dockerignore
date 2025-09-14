@@ -5,7 +5,6 @@ __pycache__/
 tests/
 data/
 outputs/
-artifacts/
 csce439-av-data/
 *.parquet
 *.csv
